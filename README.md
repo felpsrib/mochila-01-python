@@ -21,10 +21,12 @@ Abra a pasta do projeto no terminal ou no VS Code e execute:
 python app.py
 ```
 
-Em sistemas que usam `py` (Windows) ou `python3`:
+Em sistemas que usam `py` (Windows) ou `python3` (Linux/macOS):
 
-```powershell
+```bash
 py app.py
+# ou
+python3 app.py
 ```
 
 Depois abra **http://127.0.0.1:8000** no navegador. Para encerrar o servidor, pressione `Ctrl+C`.
@@ -62,7 +64,7 @@ python mochila.py
 - [mochila.py](./mochila.py) — Algoritmo de programação dinâmica (`resolver_mochila`), reconstrução da solução e interface CLI.
 - [formulario.py](./formulario.py) — Validação de entrada e ações de adicionar/remover itens.
 - [pagina.py](./pagina.py) — Montagem dinâmica da página, barra de ocupação, tabela de resultados e matriz de PD.
-- [pagina.html](./pagina.html) — Estrutura HTML da interface web e interações do slider/tabela DP.
+- [pagina.html](./pagina.html) — Estrutura HTML da interface web e interações do slider/tabela de PD.
 - [estilo.css](./estilo.css) — Identidade visual e responsividade da interface.
 
 ## Exemplo passo a passo (capacidade 5)
