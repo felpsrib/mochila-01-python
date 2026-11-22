@@ -59,11 +59,11 @@
         <div class="capacity-block">
           <div class="capacity-header">
             <label for="capacidade-input">Capacidade</label>
-            <span class="capacity-readout" id="capacidade-readout">$capacidade / $slider_max</span>
+            <span class="capacity-readout" id="capacidade-readout">$capacidade / $capacidade_maxima</span>
           </div>
           <div class="capacity-controls">
-            <input id="capacidade-input" class="capacity-number" type="number" min="0" max="200" required name="capacidade" value="$capacidade">
-            <input id="capacidade-slider" class="capacity-slider" type="range" min="0" max="$slider_max" value="$capacidade" aria-label="Ajustar capacidade da mochila">
+            <input id="capacidade-input" class="capacity-number" type="number" min="0" max="$capacidade_maxima" required name="capacidade" value="$capacidade">
+            <input id="capacidade-slider" class="capacity-slider" type="range" min="0" max="$capacidade_maxima" value="$capacidade" aria-label="Ajustar capacidade da mochila">
           </div>
         </div>
 
@@ -250,26 +250,22 @@
     if (!numInput || !slider) return;
 
     function syncCapacity(rawVal, source) {
+      var maxVal = parseInt(slider.max, 10);
+      if (isNaN(maxVal) || maxVal <= 0) maxVal = 200;
+
       var val = parseInt(rawVal, 10);
       if (isNaN(val)) {
         val = 0;
       }
       if (val < 0) val = 0;
-      if (val > 200) val = 200;
-
-      var currentMax = parseInt(slider.max, 10);
-      if (isNaN(currentMax) || currentMax < 20) currentMax = 20;
-      if (val > currentMax) {
-        currentMax = val;
-        slider.max = String(currentMax);
-      }
+      if (val > maxVal) val = maxVal;
 
       if (source !== 'number') numInput.value = String(val);
       if (source !== 'slider') slider.value = String(val);
-      var pct = currentMax > 0 ? (val / currentMax) * 100 : 0;
+      var pct = (val / maxVal) * 100;
       slider.style.setProperty('--range-pct', pct + '%');
       if (readout) {
-        readout.textContent = val + ' / ' + currentMax;
+        readout.textContent = val + ' / ' + maxVal;
       }
     }
 

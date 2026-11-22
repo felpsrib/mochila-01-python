@@ -1,6 +1,8 @@
 """Mochila 0/1 com programação dinâmica. Execute: python mochila.py --exemplo"""
+from __future__ import annotations
+
 import argparse
-from typing import NamedTuple
+from typing import Dict, FrozenSet, List, NamedTuple, Sequence, Tuple
 
 
 class Item(NamedTuple):
@@ -9,13 +11,24 @@ class Item(NamedTuple):
     valor: int
 
 
-def resolver_mochila(itens, capacidade):
-    """Retorna o valor ótimo, os itens escolhidos e a tabela de decisões em valor."""
+class SolucaoMochila(NamedTuple):
+    valor: int
+    escolhidos: List[Item]
+    indices_escolhidos: FrozenSet[int]
+    caminho: Dict[int, int]
+    tabela: List[List[int]]
+
+
+def resolver_mochila_detalhada(
+    itens: Sequence[Item],
+    capacidade: int,
+) -> SolucaoMochila:
+    """Resolve a Mochila 0/1 retornando valor, itens, índices, caminho e tabela."""
     if capacidade < 0 or any(item.peso < 0 for item in itens):
         raise ValueError("Pesos e capacidade devem ser não negativos.")
 
     # tabela[i][c] é o maior valor usando os primeiros i itens com capacidade c.
-    tabela = [[0] * (capacidade + 1)]
+    tabela: List[List[int]] = [[0] * (capacidade + 1)]
     for item in itens:
         anterior = tabela[-1]
         atual = anterior.copy()  # Começamos com a opção de deixar o item de fora.
@@ -25,19 +38,40 @@ def resolver_mochila(itens, capacidade):
             atual[c] = max(anterior[c], incluir)
         tabela.append(atual)
 
-    escolhidos = []
+    escolhidos: List[Item] = []
+    indices: List[int] = []
+    caminho: Dict[int, int] = {}
     restante = capacidade
     for i in range(len(itens), 0, -1):
+        caminho[i] = restante
         # Em empate, mantemos a solução anterior.
         if tabela[i][restante] > tabela[i - 1][restante]:
-            item = itens[i - 1]
-            escolhidos.append(item)
-            restante -= item.peso
+            indice = i - 1
+            escolhidos.append(itens[indice])
+            indices.append(indice)
+            restante -= itens[indice].peso
+    caminho[0] = restante
     escolhidos.reverse()
-    return tabela[-1][capacidade], escolhidos, tabela
+
+    return SolucaoMochila(
+        valor=tabela[-1][capacidade],
+        escolhidos=escolhidos,
+        indices_escolhidos=frozenset(indices),
+        caminho=caminho,
+        tabela=tabela,
+    )
 
 
-def ler_inteiro(pergunta):
+def resolver_mochila(
+    itens: Sequence[Item],
+    capacidade: int,
+) -> Tuple[int, List[Item], List[List[int]]]:
+    """Retorna o valor ótimo, os itens escolhidos e a tabela de decisões em valor."""
+    solucao = resolver_mochila_detalhada(itens, capacidade)
+    return solucao.valor, solucao.escolhidos, solucao.tabela
+
+
+def ler_inteiro(pergunta: str) -> int:
     while True:
         try:
             numero = int(input(pergunta))
@@ -48,7 +82,7 @@ def ler_inteiro(pergunta):
         print("Digite um número inteiro maior ou igual a zero.")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Problema da Mochila 0/1")
     parser.add_argument("--exemplo", action="store_true", help="usar os itens A, B e C")
     parser.add_argument("--tabela", action="store_true", help="exibir a tabela de valores")
@@ -70,9 +104,11 @@ def main():
         nomes = ["Sem itens"] + [item.nome for item in itens]
         largura = max(len(nome) for nome in nomes)
         celula = max(len(str(capacidade)), len(str(valor))) + 1
-        def linha(rotulo, valores):
+
+        def linha(rotulo: str, valores: Sequence[int]) -> None:
             print(f"{rotulo:<{largura}} |" + "".join(f"{v:>{celula}}" for v in valores))
-        linha("Até o item", range(capacidade + 1))
+
+        linha("Até o item", list(range(capacidade + 1)))
         for nome, valores in zip(nomes, tabela):
             linha(nome, valores)
     print("\nItens escolhidos:")

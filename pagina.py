@@ -1,11 +1,18 @@
+"""Renderização da página HTML do simulador da Mochila 0/1."""
+from __future__ import annotations
+
 from html import escape
 from pathlib import Path
 from string import Template
+from typing import Optional, Sequence, Tuple
 
-from mochila import resolver_mochila
+from formulario import CAPACIDADE_MAXIMA
+from mochila import Item, resolver_mochila_detalhada
 
 PASTA = Path(__file__).resolve().parent
 ARQUIVO_HTML = PASTA / "pagina.html"
+
+_CACHE_MODELO: Optional[Tuple[int, Template]] = None
 
 PALETA_BARRA = (
     "#1c9a86",
@@ -39,14 +46,23 @@ ICONE_LIXEIRA = (
 )
 
 
-def _formatar_percentual_capacidade(peso_parte, capacidade):
+def _carregar_modelo() -> Template:
+    """Mantém o template HTML em cache e recarrega automaticamente se o arquivo mudar."""
+    global _CACHE_MODELO
+    mtime = ARQUIVO_HTML.stat().st_mtime_ns
+    if _CACHE_MODELO is None or _CACHE_MODELO[0] != mtime:
+        _CACHE_MODELO = (mtime, Template(ARQUIVO_HTML.read_text(encoding="utf-8")))
+    return _CACHE_MODELO[1]
+
+
+def _formatar_percentual_capacidade(peso_parte: int, capacidade: int) -> str:
     if capacidade <= 0:
         return "0,0%"
     pct = (peso_parte / capacidade) * 100
     return f"{pct:.1f}%".replace(".", ",")
 
 
-def _formatar_sobra(capacidade, livre):
+def _formatar_sobra(capacidade: int, livre: int) -> str:
     if capacidade == 0:
         return "Capacidade zerada"
     if livre == 0:
@@ -56,23 +72,17 @@ def _formatar_sobra(capacidade, livre):
     return f"Sobram {livre} unidades"
 
 
-def pagina(itens, capacidade, aviso=""):
-    modelo = Template(ARQUIVO_HTML.read_text(encoding="utf-8"))
-    valor, escolhidos, tabela = resolver_mochila(itens, capacidade)
+def pagina(itens: Sequence[Item], capacidade: int, aviso: str = "") -> str:
+    modelo = _carregar_modelo()
+    solucao = resolver_mochila_detalhada(itens, capacidade)
+    valor = solucao.valor
+    escolhidos = solucao.escolhidos
+    escolhidos_indices = solucao.indices_escolhidos
+    caminho = solucao.caminho
+    tabela = solucao.tabela
+
     peso = sum(item.peso for item in escolhidos)
     livre = max(0, capacidade - peso)
-    slider_max = max(20, capacidade)
-
-    # Reconstrói os índices escolhidos e o caminho percorrido na tabela DP.
-    restante = capacidade
-    caminho = {}
-    escolhidos_indices = set()
-    for i in range(len(itens), 0, -1):
-        caminho[i] = restante
-        if tabela[i][restante] > tabela[i - 1][restante]:
-            escolhidos_indices.add(i - 1)
-            restante -= itens[i - 1].peso
-    caminho[0] = restante
 
     campos = []
     for i, item in enumerate(itens):
@@ -144,7 +154,7 @@ def pagina(itens, capacidade, aviso=""):
         linhas = '<tr><td colspan="4" class="empty-cell">Nenhum item selecionado para esta capacidade.</td></tr>'
         rodape_tabela = ""
 
-    # Tabela de programação dinâmica com destaque do caminho ótimo e marcação dos itens escolhidos.
+    # Tabela de programação dinâmica usando o caminho calculado em mochila.py.
     matriz = []
     for i, valores in enumerate(tabela):
         nome_raw = itens[i - 1].nome if i else "Sem itens"
@@ -171,7 +181,7 @@ def pagina(itens, capacidade, aviso=""):
         campos="".join(campos),
         aviso_bloco=aviso_bloco,
         capacidade=capacidade,
-        slider_max=slider_max,
+        capacidade_maxima=CAPACIDADE_MAXIMA,
         valor=valor,
         peso=peso,
         sobra_texto=_formatar_sobra(capacidade, livre),

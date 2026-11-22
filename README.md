@@ -82,13 +82,22 @@ python mochila.py
 
 ## Estrutura do projeto
 
-- [app.py](./app.py) — Servidor HTTP local (rotas `/`, `/estilo.css` e tratamento de formulários `POST`).
-- [mochila.py](./mochila.py) — Algoritmo de programação dinâmica (`resolver_mochila`), reconstrução da solução e interface CLI.
-- [formulario.py](./formulario.py) — Validação de entrada e ações de adicionar/remover itens.
-- [pagina.py](./pagina.py) — Montagem dinâmica da página, barra de ocupação, tabela de resultados e matriz de PD.
-- [pagina.html](./pagina.html) — Estrutura HTML da interface web e interações do slider/tabela de PD.
+- [app.py](./app.py) — Servidor HTTP local (rotas `/`, `/estilo.css`, cache em memória por `mtime` e tratamento de formulários `POST`).
+- [mochila.py](./mochila.py) — Algoritmo de programação dinâmica (`resolver_mochila` e `resolver_mochila_detalhada`), reconstrução da solução em um único ponto e interface CLI.
+- [formulario.py](./formulario.py) — Validação tipada de entrada com mensagens descritivas e ações de adicionar/remover itens.
+- [pagina.py](./pagina.py) — Montagem dinâmica da página, cache do template por `mtime`, barra de ocupação, tabela de resultados e matriz de PD.
+- [pagina.html](./pagina.html) — Estrutura HTML da interface web e interações do slider (`0` a `200`) e da tabela de PD.
 - [estilo.css](./estilo.css) — Identidade visual e responsividade da interface.
+- [tests/test_mochila.py](./tests/test_mochila.py) — Suíte de testes automatizados com `unittest` (biblioteca padrão).
 - [assets/logo.svg](./assets/logo.svg) — Logotipo vetorial do sistema.
+
+## Testes automatizados
+
+Para executar toda a suíte de testes (algoritmo, empates, peso zero, validação do formulário, renderização HTML e rotas HTTP):
+
+```bash
+python -m unittest discover -s tests -v
+```
 
 ## Exemplo passo a passo (capacidade 5)
 
