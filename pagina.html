@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#f6f8fa">
+<meta name="darkreader-lock">
+<title>Mochila 0/1 · Simulador</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23168b78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z'/%3E%3Cpath d='M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2'/%3E%3Cpath d='M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5'/%3E%3Cpath d='M8 10h8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/estilo.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 11V8.5C15 7.11929 16.1193 6 17.5 6H22.5C23.8807 6 25 7.11929 25 8.5V11" stroke="#168B78" stroke-width="2.2" stroke-linecap="round"/>
+          <rect x="8" y="11" width="24" height="23" rx="6" fill="#E3F6F1" stroke="#168B78" stroke-width="2.2"/>
+          <path d="M8 19H5.8C4.80589 19 4 19.8059 4 20.8V28.2C4 29.1941 4.80589 30 5.8 30H8" stroke="#168B78" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M32 19H34.2C35.1941 19 36 19.8059 36 20.8V28.2C36 29.1941 35.1941 30 34.2 30H32" stroke="#168B78" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M13 17H27" stroke="#168B78" stroke-width="2.2" stroke-linecap="round"/>
+          <rect x="13" y="23" width="14" height="7" rx="2.5" fill="#FFFFFF" stroke="#168B78" stroke-width="2"/>
+        </svg>
+      </div>
+      <div>
+        <p class="brand-eyebrow">Projeto e Análise de Algoritmos</p>
+        <h1>Mochila 0/1</h1>
+        <p class="brand-subtitle">Encontre os itens de maior valor que cabem na mochila.</p>
+      </div>
+    </div>
+    <div class="header-pill">Programação Dinâmica · Complexidade O(n · W)</div>
+  </div>
+</header>
+
+<main class="workspace">
+  <div class="dashboard-grid">
+    <section class="card">
+      <div class="step-badge">01. Entrada de dados</div>
+      <div class="card-title-row">
+        <span class="card-title-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="16" rx="2"/>
+            <path d="M3 10h18"/>
+            <path d="M8 15h2"/>
+          </svg>
+        </span>
+        <h2>Monte o cenário</h2>
+      </div>
+      <p class="card-desc">Defina a capacidade e os itens disponíveis</p>
+
+      <form method="post" action="/">
+        <button type="submit" name="acao" value="calcular" class="sr-only" tabindex="-1">Calcular solução</button>
+
+        <div class="capacity-block">
+          <div class="capacity-header">
+            <label for="capacidade-input">Capacidade</label>
+            <span class="capacity-readout" id="capacidade-readout">$capacidade / $slider_max</span>
+          </div>
+          <div class="capacity-controls">
+            <input id="capacidade-input" class="capacity-number" type="number" min="0" max="200" required name="capacidade" value="$capacidade">
+            <input id="capacidade-slider" class="capacity-slider" type="range" min="0" max="$slider_max" value="$capacidade" aria-label="Ajustar capacidade da mochila">
+          </div>
+        </div>
+
+        <div class="items-list">
+          <div class="item-row item-row-head" aria-hidden="true">
+            <span>Item</span>
+            <span>Peso (kg)</span>
+            <span>Valor ($$)</span>
+            <span>Status</span>
+            <span></span>
+          </div>
+          $campos
+        </div>
+
+        $aviso_bloco
+
+        <div class="actions-bar">
+          <button type="submit" class="btn btn-primary" name="acao" value="calcular">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 5v14"/>
+              <path d="M5 12h14"/>
+            </svg>
+            Calcular solução
+          </button>
+          <button type="submit" class="btn btn-secondary" name="acao" value="adicionar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 5v14"/>
+              <path d="M5 12h14"/>
+            </svg>
+            Adicionar item
+          </button>
+          <a class="btn-ghost-link" href="/">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            Restaurar exemplo dos sete itens
+          </a>
+        </div>
+      </form>
+    </section>
+
+    <div class="right-stack">
+      <section class="card">
+        <div class="card-title-row">
+          <h2>Solução calculada</h2>
+          <span class="pill-soft">Resultados</span>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Valor máximo</span>
+              <span class="metric-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="6"/>
+                  <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                </svg>
+              </span>
+            </div>
+            <strong class="metric-value accent">$valor</strong>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Peso usado</span>
+            </div>
+            <strong class="metric-value neutral">$peso / $capacidade</strong>
+            <span class="metric-subbadge">$sobra_texto</span>
+          </div>
+        </div>
+
+        <div class="occupancy-block">
+          <p class="occupancy-title">Ocupação da mochila ($peso / $capacidade)</p>
+          <div class="segmented-bar" role="img" aria-label="Ocupação da mochila: $peso de $capacidade unidades">
+            $barra_segmentos
+          </div>
+          <div class="occupancy-legend">
+            $barra_legenda
+          </div>
+        </div>
+
+        <div class="chosen-block">
+          <h3 class="chosen-title">Itens escolhidos ($qtd_itens_texto)</h3>
+          <div class="table-wrap">
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="num">Peso</th>
+                  <th class="num">Valor</th>
+                  <th class="num">% da capacidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                $linhas
+              </tbody>
+              $rodape_tabela
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <button type="button" id="dp-trigger" class="dp-trigger-card" aria-expanded="false" aria-controls="dp-panel">
+        <span class="dp-trigger-left">
+          <span class="dp-trigger-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18"/>
+              <path d="M3 15h18"/>
+              <path d="M9 3v18"/>
+              <path d="M15 3v18"/>
+            </svg>
+          </span>
+          <span>
+            <span class="dp-trigger-title">Explorar a tabela de programação dinâmica</span>
+            <span class="dp-trigger-sub">Visualizar matriz de subproblemas para capacidade 0 a $capacidade</span>
+          </span>
+        </span>
+        <span class="dp-trigger-chevron" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <section id="dp-panel" class="dp-panel" hidden>
+    <div class="dp-panel-header">
+      <div class="dp-panel-title-wrap">
+        <span class="dp-panel-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18"/>
+            <path d="M3 15h18"/>
+            <path d="M9 3v18"/>
+            <path d="M15 3v18"/>
+          </svg>
+        </span>
+        <h2>Explorar a tabela de programação dinâmica</h2>
+      </div>
+      <div class="dp-panel-controls">
+        <span class="dp-legend-pill">
+          <span class="dp-legend-dot" aria-hidden="true"></span>
+          Caminho ótimo (backtracking)
+        </span>
+        <button type="button" id="dp-collapse" class="dp-collapse-btn" aria-label="Recolher tabela de programação dinâmica">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="dp-panel-body">
+      <p class="dp-explanation">Cada coluna indica uma capacidade. Cada linha acrescenta um item. Leia as células destacadas de baixo para cima. Quando a linha anterior tem um valor menor na mesma coluna, o item entrou na mochila. Em caso de empate, a solução anterior é mantida.</p>
+      <div class="matrix-scroll">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>Até o item</th>$colunas
+            </tr>
+          </thead>
+          <tbody>
+            $matriz
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">Discentes: Felipi Ribeiro dos Santos e Igor Ruan de Sousa · Docente: Dr. Mayrton Dias de Queiroz</footer>
+
+<script>
+(function () {
+  var storageKey = 'mochila_dp_open';
+
+  function initCapacity(root) {
+    var numInput = root.querySelector('#capacidade-input');
+    var slider = root.querySelector('#capacidade-slider');
+    var readout = root.querySelector('#capacidade-readout');
+    if (!numInput || !slider) return;
+
+    function syncCapacity(rawVal, source) {
+      var val = parseInt(rawVal, 10);
+      if (isNaN(val)) {
+        val = 0;
+      }
+      if (val < 0) val = 0;
+      if (val > 200) val = 200;
+
+      var currentMax = parseInt(slider.max, 10);
+      if (isNaN(currentMax) || currentMax < 20) currentMax = 20;
+      if (val > currentMax) {
+        currentMax = val;
+        slider.max = String(currentMax);
+      }
+
+      if (source !== 'number') numInput.value = String(val);
+      if (source !== 'slider') slider.value = String(val);
+      var pct = currentMax > 0 ? (val / currentMax) * 100 : 0;
+      slider.style.setProperty('--range-pct', pct + '%');
+      if (readout) {
+        readout.textContent = val + ' / ' + currentMax;
+      }
+    }
+
+    numInput.addEventListener('input', function () {
+      syncCapacity(numInput.value, 'number');
+    });
+    numInput.addEventListener('blur', function () {
+      syncCapacity(numInput.value, 'blur');
+    });
+    slider.addEventListener('input', function () {
+      syncCapacity(slider.value, 'slider');
+    });
+    syncCapacity(numInput.value, 'init');
+  }
+
+  function initDpPanel(root) {
+    var trigger = root.querySelector('#dp-trigger');
+    var panel = root.querySelector('#dp-panel');
+    var collapseBtn = root.querySelector('#dp-collapse');
+    if (!trigger || !panel) return;
+
+    function setPanelOpen(open, shouldScroll) {
+      panel.hidden = !open;
+      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      try {
+        sessionStorage.setItem(storageKey, open ? '1' : '0');
+      } catch (e) {}
+      if (open && shouldScroll) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    try {
+      if (sessionStorage.getItem(storageKey) === '1') {
+        setPanelOpen(true, false);
+      }
+    } catch (e) {}
+
+    trigger.addEventListener('click', function () {
+      var nextOpen = panel.hidden;
+      setPanelOpen(nextOpen, nextOpen);
+    });
+
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', function () {
+        setPanelOpen(false, false);
+      });
+    }
+  }
+
+  function swapWorkspaceFromHtml(htmlText, acao) {
+    var doc = new DOMParser().parseFromString(htmlText, 'text/html');
+    var newMain = doc.querySelector('main.workspace');
+    var curMain = document.querySelector('main.workspace');
+    if (!newMain || !curMain) return false;
+    curMain.innerHTML = newMain.innerHTML;
+    bindWorkspace(curMain);
+    if (acao === 'adicionar') {
+      var inputs = curMain.querySelectorAll('.item-name-input');
+      if (inputs.length > 0) {
+        var lastInput = inputs[inputs.length - 1];
+        lastInput.focus();
+        lastInput.select();
+      }
+    }
+    return true;
+  }
+
+  function initForm(root) {
+    var form = root.querySelector('form');
+    if (!form || !window.fetch || !window.DOMParser || !window.URLSearchParams) return;
+
+    var clickedAcao = null;
+    form.addEventListener('click', function (event) {
+      var btn = event.target && event.target.closest ? event.target.closest('button[name="acao"]') : null;
+      if (btn && btn.value) {
+        clickedAcao = btn.value;
+      }
+    });
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var submitter = event.submitter;
+      var acao = (submitter && submitter.name === 'acao' && submitter.value)
+        ? submitter.value
+        : (clickedAcao || 'calcular');
+      clickedAcao = null;
+
+      var formData = new FormData(form);
+      formData.set('acao', acao);
+      var params = new URLSearchParams();
+      formData.forEach(function (value, key) {
+        params.append(key, String(value));
+      });
+
+      fetch(form.getAttribute('action') || '/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: params.toString()
+      })
+        .then(function (resp) {
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          return resp.text();
+        })
+        .then(function (htmlText) {
+          if (!swapWorkspaceFromHtml(htmlText, acao)) {
+            form.submit();
+          }
+        })
+        .catch(function () {
+          form.submit();
+        });
+    });
+
+    var resetLink = root.querySelector('.btn-ghost-link');
+    if (resetLink) {
+      resetLink.addEventListener('click', function (event) {
+        event.preventDefault();
+        fetch(resetLink.getAttribute('href') || '/')
+          .then(function (resp) {
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            return resp.text();
+          })
+          .then(function (htmlText) {
+            if (!swapWorkspaceFromHtml(htmlText, 'restaurar')) {
+              window.location.href = resetLink.getAttribute('href') || '/';
+            }
+          })
+          .catch(function () {
+            window.location.href = resetLink.getAttribute('href') || '/';
+          });
+      });
+    }
+  }
+
+  function bindWorkspace(root) {
+    initCapacity(root);
+    initDpPanel(root);
+    initForm(root);
+  }
+
+  var workspace = document.querySelector('main.workspace');
+  if (workspace) {
+    bindWorkspace(workspace);
+  }
+})();
+</script>
+</body>
+</html>
