@@ -61,46 +61,19 @@ Ao clicar em **Explorar a tabela de programação dinâmica**, o painel expande 
 O sistema segue uma arquitetura em camadas leves usando apenas a **biblioteca padrão do Python**, separando servidor HTTP, validação de entrada, renderização de template e núcleo algorítmico (sem duplicação da lógica de *backtracking*):
 
 ```mermaid
-flowchart TD
-  subgraph Cliente["Cliente (Navegador)"]
-    HTML["pagina.html (Interface, slider 0-200 e fetch)"]
-    CSS["estilo.css (Identidade visual e layout responsivo)"]
-  end
+flowchart LR
+  UI["Navegador (pagina.html e estilo.css)"]
+  APP["Servidor HTTP (app.py)"]
+  FORM["Validação (formulario.py)"]
+  PAGE["Renderização (pagina.py)"]
+  CORE["Núcleo de PD (mochila.py)"]
+  CLI["Terminal CLI"]
 
-  subgraph Servidor["Servidor HTTP (app.py)"]
-    HTTP["ServidorHTTPExclusivo (GET /, GET /estilo.css, POST /)"]
-    CacheCSS["carregar_css (cache em memoria por mtime)"]
-  end
-
-  subgraph Aplicacao["Validacao e Renderizacao"]
-    Form["formulario.py (ler_formulario: limites e acoes)"]
-    Page["pagina.py (pagina: template em cache, barra e matriz)"]
-  end
-
-  subgraph Nucleo["Nucleo Algoritmico (mochila.py)"]
-    DP["resolver_mochila_detalhada (matriz PD + backtracking unico)"]
-    Sol["SolucaoMochila (valor, escolhidos, indices, caminho, tabela)"]
-    CLI["Interface CLI (python mochila.py)"]
-  end
-
-  subgraph Qualidade["Testes (tests/)"]
-    Tests["test_mochila.py (13 testes unittest)"]
-  end
-
-  HTML -- "GET / e POST / (form/fetch)" --> HTTP
-  HTTP -. "GET /estilo.css" .-> CSS
-  HTTP --> CacheCSS
-  HTTP -- "POST / (dados do formulario)" --> Form
-  Form -- "(itens, capacidade, aviso)" --> Page
-  HTTP -- "GET / (cenario inicial)" --> Page
-  Page --> DP
-  DP --> Sol
-  Sol --> Page
-  Page -- "HTML renderizado" --> HTTP
-  CLI --> DP
-  Tests -. "valida nucleo, formulario e HTTP" .-> DP
-  Tests -.-> Form
-  Tests -.-> HTTP
+  UI <-->|"GET / · POST / · CSS"| APP
+  APP -->|"1. valida entrada"| FORM
+  APP -->|"2. gera HTML"| PAGE
+  PAGE -->|"3. resolve PD + backtracking"| CORE
+  CLI -->|"uso direto"| CORE
 ```
 
 ### Fluxo de uma requisição (`POST /`)
