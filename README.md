@@ -51,7 +51,7 @@ py app.py
 python3 app.py
 ```
 
-Depois abra **http://127.0.0.1:8000** no navegador. Para encerrar o servidor, pressione `Ctrl+C`.
+Depois abra **http://127.0.0.1:8000** no navegador (se a porta `8000` já estiver em uso, o servidor escolhe automaticamente a próxima porta livre e exibe o endereço no terminal; você também pode informar outra porta com `python app.py --porta 8080`). Para encerrar o servidor, pressione `Ctrl+C`.
 
 **O que a interface web oferece:**
 - **Cenário inicial** com 7 itens e capacidade `20` (solução ótima: peso `17/20`, valor máximo `55`).

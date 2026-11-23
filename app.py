@@ -1,6 +1,8 @@
 """Execute com python app.py e abra o endereço indicado no terminal."""
 from __future__ import annotations
 
+import argparse
+import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Mapping, Optional, Sequence, Tuple
@@ -88,13 +90,54 @@ class Servidor(BaseHTTPRequestHandler):
         self.enviar(html)
 
 
-if __name__ == "__main__":
-    with ThreadingHTTPServer(("127.0.0.1", 8000), Servidor) as servidor:
+class ServidorHTTPExclusivo(ThreadingHTTPServer):
+    """Impede dividir a mesma porta com outro servidor já ativo no Windows."""
+
+    allow_reuse_address = False
+
+    def server_bind(self) -> None:
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+
+def criar_servidor(porta_inicial: int = 8000, tentativas: int = 20) -> Tuple[ServidorHTTPExclusivo, int]:
+    """Abre o servidor na porta solicitada ou na próxima porta livre."""
+    for porta in range(porta_inicial, porta_inicial + tentativas):
+        try:
+            return ServidorHTTPExclusivo(("127.0.0.1", porta), Servidor), porta
+        except OSError:
+            continue
+    return ServidorHTTPExclusivo(("127.0.0.1", 0), Servidor), 0
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Servidor web da Mochila 0/1")
+    parser.add_argument(
+        "--porta",
+        type=int,
+        default=8000,
+        help="porta local preferencial (padrão: 8000)",
+    )
+    args = parser.parse_args()
+
+    servidor, porta_usada = criar_servidor(args.porta)
+    porta_real = porta_usada or servidor.server_address[1]
+    with servidor:
+        if porta_real != args.porta:
+            print(
+                f"A porta {args.porta} já está em uso por outro processo.",
+                flush=True,
+            )
         print(
-            "Abra http://127.0.0.1:8000 no navegador. Para encerrar, pressione Ctrl+C.",
+            f"Abra http://127.0.0.1:{porta_real} no navegador. Para encerrar, pressione Ctrl+C.",
             flush=True,
         )
         try:
             servidor.serve_forever()
         except KeyboardInterrupt:
             pass
+
+
+if __name__ == "__main__":
+    main()
