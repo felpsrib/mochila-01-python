@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./assets/logo.svg" alt="Logo Mochila 0/1" width="76" height="76">
   <h1>Problema da Mochila 0/1 em Python</h1>
-  <p>Simulador web e CLI com <strong>Programação Dinâmica</strong> e visualização do <em>backtracking</em>.</p>
+  <p>Simulador web interativo e CLI com <strong>Programação Dinâmica</strong> e visualização do <em>backtracking</em>.</p>
 
   <p>
     <img src="https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.8+">
@@ -10,25 +10,112 @@
     <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=000000" alt="JavaScript">
     <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git">
   </p>
+
+  <p>
+    <a href="#visão-geral-da-interface">Interface</a> ·
+    <a href="#arquitetura-do-sistema">Arquitetura</a> ·
+    <a href="#como-executar">Como executar</a> ·
+    <a href="#exemplo-passo-a-passo-capacidade-5">Algoritmo</a> ·
+    <a href="#testes-automatizados">Testes</a>
+  </p>
 </div>
 
 ---
 
-Quais itens vale a pena levar quando a mochila tem um limite de peso? Neste projeto, cada item tem um peso e um valor. O sistema encontra uma combinação com o **maior valor total possível** dentro da capacidade informada usando **programação dinâmica**. O nome **0/1** representa as duas escolhas para cada item: deixá-lo de fora (`0`) ou levá-lo inteiro uma única vez (`1`).
+Quais itens vale a pena levar quando a mochila tem um limite de peso? Neste projeto, cada item possui um peso e um valor, e o sistema encontra uma combinação com o **maior valor total possível** dentro da capacidade informada usando **programação dinâmica**. O nome **0/1** representa as duas escolhas para cada item: deixá-lo de fora (`0`) ou levá-lo inteiro uma única vez (`1`).
 
 ## Contexto acadêmico
 
-Projeto desenvolvido para a disciplina de **Projeto e Análise de Algoritmos (PAA)**, com o objetivo de aplicar programação dinâmica a um problema clássico de otimização, visualizar a tabela de subproblemas com reconstrução da solução ótima (*backtracking*) e analisar a complexidade de tempo e memória.
+Projeto desenvolvido para a disciplina de **Projeto e Análise de Algoritmos (PAA)**, com o objetivo de aplicar programação dinâmica a um problema clássico de otimização, visualizar a matriz de subproblemas com reconstrução da solução ótima (*backtracking*) e analisar a complexidade de tempo e memória.
 
 - **Discentes:** Felipi Ribeiro dos Santos e Igor Ruan de Sousa
 - **Docente:** Dr. Mayrton Dias de Queiroz
 
+## Visão geral da interface
+
+### Tela principal — Montagem do cenário e solução ótima
+
+<p align="center">
+  <img src="./assets/interface-principal.png" alt="Tela principal do simulador Mochila 0/1 com montagem do cenário e solução calculada" width="100%">
+</p>
+
+A tela principal é organizada em dois painéis sincronizados:
+
+- **Monte o cenário (esquerda):** permite ajustar a capacidade da mochila de `0` a `200` via campo numérico ou controle deslizante, editar nomes, pesos e valores, adicionar até `50` itens, remover linhas ou restaurar o cenário padrão de 7 itens. Os itens escolhidos na solução ótima recebem destaque visual em verde e o selo **Selecionado**.
+- **Solução calculada (direita):** apresenta o **valor máximo** alcançado, o **peso usado** com o saldo livre de capacidade, uma **barra segmentada proporcional** identificando quanto cada item escolhido ocupa na mochila e a tabela detalhada dos itens selecionados com a coluna **% da capacidade** e a linha **Total**.
+
+### Tabela de programação dinâmica e *backtracking*
+
+<p align="center">
+  <img src="./assets/tabela-pd.png" alt="Tabela de programação dinâmica com destaque do caminho ótimo no backtracking" width="100%">
+</p>
+
+Ao clicar em **Explorar a tabela de programação dinâmica**, o painel expande em largura total exibindo a matriz de subproblemas `(n + 1) × (W + 1)`:
+
+- Cada **coluna** representa uma capacidade parcial (de `0` até `W`) e cada **linha** considera mais um item disponível.
+- As células destacadas em verde indicam o **caminho ótimo percorrido de baixo para cima** durante o *backtracking*, permitindo acompanhar visualmente quando o valor cresce em relação à linha anterior (item incluído) ou empata (solução anterior mantida).
+- Os itens que efetivamente entraram na mochila recebem um indicador circular verde ao lado do nome na coluna fixa **Até o item**.
+
+## Arquitetura do sistema
+
+O sistema segue uma arquitetura em camadas leves usando apenas a **biblioteca padrão do Python**, separando servidor HTTP, validação de entrada, renderização de template e núcleo algorítmico (sem duplicação da lógica de *backtracking*):
+
+```mermaid
+flowchart TD
+  subgraph Cliente["Cliente (Navegador)"]
+    HTML["pagina.html (Interface, slider 0-200 e fetch)"]
+    CSS["estilo.css (Identidade visual e layout responsivo)"]
+  end
+
+  subgraph Servidor["Servidor HTTP (app.py)"]
+    HTTP["ServidorHTTPExclusivo (GET /, GET /estilo.css, POST /)"]
+    CacheCSS["carregar_css (cache em memoria por mtime)"]
+  end
+
+  subgraph Aplicacao["Validacao e Renderizacao"]
+    Form["formulario.py (ler_formulario: limites e acoes)"]
+    Page["pagina.py (pagina: template em cache, barra e matriz)"]
+  end
+
+  subgraph Nucleo["Nucleo Algoritmico (mochila.py)"]
+    DP["resolver_mochila_detalhada (matriz PD + backtracking unico)"]
+    Sol["SolucaoMochila (valor, escolhidos, indices, caminho, tabela)"]
+    CLI["Interface CLI (python mochila.py)"]
+  end
+
+  subgraph Qualidade["Testes (tests/)"]
+    Tests["test_mochila.py (13 testes unittest)"]
+  end
+
+  HTML -- "GET / e POST / (form/fetch)" --> HTTP
+  HTTP -. "GET /estilo.css" .-> CSS
+  HTTP --> CacheCSS
+  HTTP -- "POST / (dados do formulario)" --> Form
+  Form -- "(itens, capacidade, aviso)" --> Page
+  HTTP -- "GET / (cenario inicial)" --> Page
+  Page --> DP
+  DP --> Sol
+  Sol --> Page
+  Page -- "HTML renderizado" --> HTTP
+  CLI --> DP
+  Tests -. "valida nucleo, formulario e HTTP" .-> DP
+  Tests -.-> Form
+  Tests -.-> HTTP
+```
+
+### Fluxo de uma requisição (`POST /`)
+
+1. O usuário altera a capacidade ou os itens e aciona **Calcular solução**, **Adicionar item** ou **Remover** em [pagina.html](./pagina.html) (enviado via `fetch` assíncrono, com fallback nativo de formulário).
+2. [app.py](./app.py) recebe o `POST /`, decodifica os campos UTF-8 e delega a validação para `ler_formulario` em [formulario.py](./formulario.py), retornando `400` com mensagem descritiva caso algum limite seja violado.
+3. [pagina.py](./pagina.py) invoca `resolver_mochila_detalhada` em [mochila.py](./mochila.py), que calcula a tabela de PD e executa o *backtracking* uma única vez, devolvendo `SolucaoMochila`.
+4. [pagina.py](./pagina.py) preenche o template [pagina.html](./pagina.html) (em cache por `mtime`), retorna o HTML pronto e a interface atualiza apenas a área principal mantendo fluidez e o estado da tabela de PD.
+
 ## Tecnologias utilizadas
 
-- **Python 3.8+** — Algoritmo de programação dinâmica (`mochila.py`), validação de dados e servidor HTTP usando apenas a biblioteca padrão (`http.server`, `argparse`, `typing`, `string.Template`).
-- **HTML5** — Estrutura semântica da interface web e formulários.
-- **CSS3** — Identidade visual, layout responsivo, barra de ocupação segmentada e estilização da matriz de PD.
-- **JavaScript** — Sincronização do controle deslizante de capacidade, expansão da tabela de PD e atualização assíncrona via `fetch`.
+- **Python 3.8+** — Algoritmo de programação dinâmica (`mochila.py`), validação tipada, testes (`unittest`) e servidor HTTP usando apenas a biblioteca padrão (`http.server`, `argparse`, `typing`, `string.Template`).
+- **HTML5** — Estrutura semântica da interface web, formulários e acessibilidade.
+- **CSS3** — Identidade visual clara, layout responsivo, barra de ocupação segmentada e cabeçalho/coluna fixos (`sticky`) na matriz de PD.
+- **JavaScript** — Sincronização do controle deslizante (`0` a `200`), expansão da tabela de PD e atualização assíncrona via `fetch`.
 - **Git** — Controle de versão do projeto.
 
 ## Como executar
@@ -53,13 +140,6 @@ python3 app.py
 
 Depois abra **http://127.0.0.1:8000** no navegador (se a porta `8000` já estiver em uso, o servidor escolhe automaticamente a próxima porta livre e exibe o endereço no terminal; você também pode informar outra porta com `python app.py --porta 8080`). Para encerrar o servidor, pressione `Ctrl+C`.
 
-**O que a interface web oferece:**
-- **Cenário inicial** com 7 itens e capacidade `20` (solução ótima: peso `17/20`, valor máximo `55`).
-- **Controle de capacidade** via campo numérico ou slider sincronizado (de `0` até `200`).
-- **Edição completa de itens**: altere nomes, pesos e valores, adicione novos itens (até `50`), remova linhas ou restaure o exemplo inicial.
-- **Resumo visual da solução**: valor máximo, peso usado, espaço restante, barra segmentada de ocupação por item e tabela de itens escolhidos com participação percentual na capacidade.
-- **Tabela de programação dinâmica expansível**: visualize a matriz completa de subproblemas com destaque no caminho ótimo percorrido durante o *backtracking* e marcação dos itens selecionados.
-
 ### 2. Interface de Terminal (CLI)
 
 A versão em linha de comando continua disponível em [mochila.py](./mochila.py):
@@ -82,14 +162,14 @@ python mochila.py
 
 ## Estrutura do projeto
 
-- [app.py](./app.py) — Servidor HTTP local (rotas `/`, `/estilo.css`, cache em memória por `mtime` e tratamento de formulários `POST`).
-- [mochila.py](./mochila.py) — Algoritmo de programação dinâmica (`resolver_mochila` e `resolver_mochila_detalhada`), reconstrução da solução em um único ponto e interface CLI.
+- [app.py](./app.py) — Servidor HTTP local com porta exclusiva (`SO_EXCLUSIVEADDRUSE`), fallback automático de porta, `--porta` e cache de CSS em memória por `mtime`.
+- [mochila.py](./mochila.py) — Algoritmo de programação dinâmica (`resolver_mochila` e `resolver_mochila_detalhada`), `SolucaoMochila` com *backtracking* centralizado e interface CLI.
 - [formulario.py](./formulario.py) — Validação tipada de entrada com mensagens descritivas e ações de adicionar/remover itens.
-- [pagina.py](./pagina.py) — Montagem dinâmica da página, cache do template por `mtime`, barra de ocupação, tabela de resultados e matriz de PD.
-- [pagina.html](./pagina.html) — Estrutura HTML da interface web e interações do slider (`0` a `200`) e da tabela de PD.
-- [estilo.css](./estilo.css) — Identidade visual e responsividade da interface.
-- [tests/test_mochila.py](./tests/test_mochila.py) — Suíte de testes automatizados com `unittest` (biblioteca padrão).
-- [assets/logo.svg](./assets/logo.svg) — Logotipo vetorial do sistema.
+- [pagina.py](./pagina.py) — Montagem dinâmica da página, cache do template por `mtime`, barra segmentada de ocupação, tabela de resultados e matriz de PD.
+- [pagina.html](./pagina.html) — Estrutura HTML da interface web e interações do slider (`0` a `200`), tabela de PD e `fetch`.
+- [estilo.css](./estilo.css) — Identidade visual, responsividade e bloqueio de inversão forçada de cores.
+- [tests/test_mochila.py](./tests/test_mochila.py) — Suíte de 13 testes automatizados com `unittest` (biblioteca padrão).
+- [assets/](./assets/) — Logotipo vetorial ([logo.svg](./assets/logo.svg)) e capturas da interface ([interface-principal.png](./assets/interface-principal.png) e [tabela-pd.png](./assets/tabela-pd.png)).
 
 ## Testes automatizados
 
